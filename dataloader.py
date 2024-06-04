@@ -7,7 +7,15 @@ from torchvision import datasets, transforms
 
 
 class MnistBags(data_utils.Dataset):
-    def __init__(self, target_number=9, mean_bag_length=10, var_bag_length=2, num_bag=250, seed=1, train=True):
+    def __init__(
+        self,
+        target_number=9,
+        mean_bag_length=10,
+        var_bag_length=2,
+        num_bag=250,
+        seed=1,
+        train=True
+        ):
         self.target_number = target_number
         self.mean_bag_length = mean_bag_length
         self.var_bag_length = var_bag_length
@@ -26,23 +34,35 @@ class MnistBags(data_utils.Dataset):
 
     def _create_bags(self):
         if self.train:
-            loader = data_utils.DataLoader(datasets.MNIST('../datasets',
-                                                          train=True,
-                                                          download=True,
-                                                          transform=transforms.Compose([
-                                                              transforms.ToTensor(),
-                                                              transforms.Normalize((0.1307,), (0.3081,))])),
-                                           batch_size=self.num_in_train,
-                                           shuffle=False)
+            loader = data_utils.DataLoader(
+                datasets.MNIST(
+                    '../datasets',
+                    train=True,
+                    download=True,
+                    transform=transforms.Compose(
+                        [
+                            transforms.ToTensor(),
+                            transforms.Normalize((0.1307,), (0.3081,))]
+                    )
+                    ),
+                batch_size=self.num_in_train,
+                shuffle=False
+                )
         else:
-            loader = data_utils.DataLoader(datasets.MNIST('../datasets',
-                                                          train=False,
-                                                          download=True,
-                                                          transform=transforms.Compose([
-                                                              transforms.ToTensor(),
-                                                              transforms.Normalize((0.1307,), (0.3081,))])),
-                                           batch_size=self.num_in_test,
-                                           shuffle=False)
+            loader = data_utils.DataLoader(
+                datasets.MNIST(
+                    '../datasets',
+                    train=False,
+                    download=True,
+                    transform=transforms.Compose(
+                        [
+                            transforms.ToTensor(),
+                            transforms.Normalize((0.1307,), (0.3081,))]
+                    )
+                    ),
+                batch_size=self.num_in_test,
+                shuffle=False
+                )
 
         for (batch_data, batch_labels) in loader:
             all_imgs = batch_data
@@ -52,7 +72,7 @@ class MnistBags(data_utils.Dataset):
         labels_list = []
 
         for i in range(self.num_bag):
-            bag_length = np.int(self.r.normal(self.mean_bag_length, self.var_bag_length, 1))
+            bag_length = int(self.r.normal(self.mean_bag_length, self.var_bag_length, 1))
             if bag_length < 1:
                 bag_length = 1
 
@@ -88,40 +108,54 @@ class MnistBags(data_utils.Dataset):
 
 if __name__ == "__main__":
 
-    train_loader = data_utils.DataLoader(MnistBags(target_number=9,
-                                                   mean_bag_length=10,
-                                                   var_bag_length=2,
-                                                   num_bag=100,
-                                                   seed=1,
-                                                   train=True),
-                                         batch_size=1,
-                                         shuffle=True)
+    train_loader = data_utils.DataLoader(
+        MnistBags(
+            target_number=9,
+            mean_bag_length=10,
+            var_bag_length=2,
+            num_bag=100,
+            seed=1,
+            train=True
+            ),
+        batch_size=1,
+        shuffle=True
+        )
 
-    test_loader = data_utils.DataLoader(MnistBags(target_number=9,
-                                                  mean_bag_length=10,
-                                                  var_bag_length=2,
-                                                  num_bag=100,
-                                                  seed=1,
-                                                  train=False),
-                                        batch_size=1,
-                                        shuffle=False)
+    test_loader = data_utils.DataLoader(
+        MnistBags(
+            target_number=9,
+            mean_bag_length=10,
+            var_bag_length=2,
+            num_bag=100,
+            seed=1,
+            train=False
+            ),
+        batch_size=1,
+        shuffle=False
+        )
 
     len_bag_list_train = []
     mnist_bags_train = 0
     for batch_idx, (bag, label) in enumerate(train_loader):
         len_bag_list_train.append(int(bag.squeeze(0).size()[0]))
         mnist_bags_train += label[0].numpy()[0]
-    print('Number positive train bags: {}/{}\n'
-          'Number of instances per bag, mean: {}, max: {}, min {}\n'.format(
-        mnist_bags_train, len(train_loader),
-        np.mean(len_bag_list_train), np.max(len_bag_list_train), np.min(len_bag_list_train)))
+    print(
+        'Number positive train bags: {}/{}\n'
+        'Number of instances per bag, mean: {}, max: {}, min {}\n'.format(
+            mnist_bags_train, len(train_loader),
+            np.mean(len_bag_list_train), np.max(len_bag_list_train), np.min(len_bag_list_train)
+        )
+    )
 
     len_bag_list_test = []
     mnist_bags_test = 0
     for batch_idx, (bag, label) in enumerate(test_loader):
         len_bag_list_test.append(int(bag.squeeze(0).size()[0]))
         mnist_bags_test += label[0].numpy()[0]
-    print('Number positive test bags: {}/{}\n'
-          'Number of instances per bag, mean: {}, max: {}, min {}\n'.format(
-        mnist_bags_test, len(test_loader),
-        np.mean(len_bag_list_test), np.max(len_bag_list_test), np.min(len_bag_list_test)))
+    print(
+        'Number positive test bags: {}/{}\n'
+        'Number of instances per bag, mean: {}, max: {}, min {}\n'.format(
+            mnist_bags_test, len(test_loader),
+            np.mean(len_bag_list_test), np.max(len_bag_list_test), np.min(len_bag_list_test)
+        )
+    )
